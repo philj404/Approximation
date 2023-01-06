@@ -78,7 +78,8 @@ void Approximation::engUnitScaleFor(double aValue, char& siPrefix, double& siSca
     siPrefix = '\0';
     siScale = 1.0;
 
-    for (int i = 0; scales[i].scale != 0.0; i++) {
+    static const int numScales = (sizeof(scales)/sizeof(ScaleAndName));
+    for (int i = 0; i < numScales; i++) {
         auto aScale = scales[i];
         if (positiveValue >= aScale.scale) {
             siPrefix = aScale.prefix;
