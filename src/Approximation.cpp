@@ -1,6 +1,6 @@
 // Approximation.cpp
-#include "Approximation.h"
 #include <Arduino.h>
+#include "Approximation.h"
 
 Approximation::Approximation(double val, double res)
     : Approximation(val, "", res){};
@@ -90,12 +90,9 @@ void Approximation::engUnitScaleFor(double aValue, char& siPrefix, double& siSca
 
 String Approximation::asString(void) const
 {
-    //bool negative = (_actual < 0.0);
-    auto positiveActual = fabs(_actual);
-
     // note the underlying float has at most 6 significant digits!
     int numDigits = 1;
-    float ratio = positiveActual / _resolution;
+    float ratio = fabs(_actual / _resolution);
     while (ratio >= 10.) {
         numDigits++;
         ratio /= 10.;
@@ -106,7 +103,7 @@ String Approximation::asString(void) const
     engUnitScaleFor(_actual, engUnit, normalizeUnit);
 
     auto digitsAfterDecimal = numDigits;
-    float displayActual = positiveActual / normalizeUnit;
+    float displayActual = fabs(_actual / normalizeUnit);
     if (displayActual >= 100.) {
         digitsAfterDecimal -= 3;
     } else if (displayActual >= 10.) {
@@ -115,7 +112,7 @@ String Approximation::asString(void) const
         digitsAfterDecimal -= 1;
     }
     
-    displayActual = _actual / normalizeUnit;
+    displayActual = _actual / normalizeUnit; // signed
     if (digitsAfterDecimal < 0) {
         //auto coarseResolution = _resolution / normalizeUnit;
         auto coarseResolution = (digitsAfterDecimal < -1) ? 100. : 10.;
