@@ -102,10 +102,10 @@ test(engineeringScales)
     //assertEqual(1.0e-3*1000, engScaleFor(1.05e-3)*1000);
     assertNear(1.0e-3, engScaleFor(1.05e-3), 1.0e-6);
 
-    assertEqual(1.0e-6, engScaleFor(1.05e-6));
-    assertEqual(1.0e-9, engScaleFor(1.05e-9));
-    assertEqual(1.0e-12, engScaleFor(1.05e-12));
-    assertEqual(1.0e-3, engScaleFor(-1.05e-3));
+    assertNear(1.0e-6, engScaleFor(1.05e-6), 1.0e-9);
+    assertNear(1.0e-9, engScaleFor(1.05e-9), 1.0e-12);
+    assertNear(1.0e-12, engScaleFor(1.05e-12), 1.0e-15);
+    assertNear(1.0e-3, engScaleFor(-1.05e-3), 1.0e-6);
 }
 
 // Arduino float to String conversion examples
