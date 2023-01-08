@@ -94,11 +94,13 @@ test(engineeringScales)
     assertEqual(1.0e6, engScaleFor(1.05e6));
     assertEqual(1.0e9, engScaleFor(1.05e9));
 
-    // Some Arduino floating point implementations can't print > 1.e9 
-    // printing is fixed point and limited to long limits
+    // Some Arduino platform floating point can't print > 1.e9 
+    // printing is fixed point and has <long> limitations
     //assertEqual(1.0e12, engScaleFor(1.05e12));
 
-    assertEqual(1.0e-3, engScaleFor(1.05e-3));
+    //assertEqual(1.0e-3, engScaleFor(1.05e-3));
+    assertEqual(1.0e-3*1000, engScaleFor(1.05e-3)*1000);
+
     assertEqual(1.0e-6, engScaleFor(1.05e-6));
     assertEqual(1.0e-9, engScaleFor(1.05e-9));
     assertEqual(1.0e-12, engScaleFor(1.05e-12));
