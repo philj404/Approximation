@@ -111,8 +111,8 @@ String Approximation::asString(void) const
     } else {
         digitsAfterDecimal -= 1;
     }
-    
-    displayActual = _actual / normalizeUnit; // signed
+
+    displayActual = _actual / normalizeUnit;  // signed
     if (digitsAfterDecimal < 0) {
         //auto coarseResolution = _resolution / normalizeUnit;
         auto coarseResolution = (digitsAfterDecimal < -1) ? 100. : 10.;
@@ -122,7 +122,7 @@ String Approximation::asString(void) const
 
     String s(displayActual, digitsAfterDecimal);
     if ((engUnit != 0) || (_units[0] != 0)) {
-        s += F(" ");
+        //s += F(" ");
         if (engUnit) { s += engUnit; }
         s += _units;
     }

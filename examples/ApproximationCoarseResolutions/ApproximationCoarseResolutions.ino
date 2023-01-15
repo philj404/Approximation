@@ -1,4 +1,4 @@
-// Approximation library tests
+// Approximation resolution demo
 
 #include <Arduino.h>
 #include <Approximation.h>
@@ -48,46 +48,6 @@ void demoCoarseResolutions(void)
     Serial.println();
 }
 
-void demoUnits(void)
-{
-    Serial.println(F("Show units with value"));
-
-    Approximation power(50, 0.01);
-    power.units("W");
-
-    Serial.print(F("Power is: "));
-    Serial.println(power);
-
-    Approximation speedOfSound(331.29, 0.1);
-    speedOfSound.units("m/s");
-
-    Serial.print(F("The speed of sound in dry air at 0 degrees C is about: "));
-    Serial.println(speedOfSound);
-    Serial.println();
-
-    Approximation orbitalSpeedAtEquator(7.1e3, 100.);
-    orbitalSpeedAtEquator.units("m/s");
-
-    Serial.print(F("Low orbit speed at equator is about: "));
-    Serial.println(orbitalSpeedAtEquator);
-    Serial.println();
-}
-
-void demoUnitConversions(void)
-{
-    Serial.println(F("Unit conversion -- ADC-counts to Volts"));
-
-    Approximation adcInput(125, 1.0);
-    adcInput.units("adc-counts");
-
-    Approximation voltage = adcInput.convertFromTo(250., "adc-counts", 5.0, "V");
-
-    Serial.print(F("ADC input is: "));
-    Serial.print(adcInput);
-    Serial.print(F("; this is equivalent to: "));
-    Serial.println(voltage);
-    Serial.println();
-}
 //----------------------------------------------------------------------------
 // setup() and loop()
 //----------------------------------------------------------------------------
@@ -102,12 +62,6 @@ void setup()
     Serial.println(F("Running " __FILE__ ",\nBuilt " __DATE__));
 
     demoCoarseResolutions();
-    // demoFixedPointResolutions();
-    // demoScientificNotation();
-    // demoEngineeringNotation();
-    demoUnitConversions();
-    // demoApproximationMath();
-    demoUnits();
 }
 
 void loop()
