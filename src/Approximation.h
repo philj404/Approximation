@@ -9,6 +9,8 @@ class Approximation
     Approximation(void);
     Approximation(double aValue, double aResolution);
     Approximation(double aValue, const String& units, double aResolution);
+    Approximation(const Approximation& a);
+
     void value(double aValue);
     void value(double aValue, double resolution);
     double value(void) const;
@@ -75,7 +77,7 @@ class Approximation
 
   private:
     bool unitsMatch(const Approximation& rhs) const;
-    
+
     enum CompareResult { Less,
                          Equal,
                          Greater,

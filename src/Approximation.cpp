@@ -15,6 +15,14 @@ Approximation::Approximation(double aValue, const String& units, double aResolut
     _units = units;
 };
 
+Approximation::Approximation(const Approximation& a)
+{
+    _requested = a._requested;
+    _actual = a._actual;
+    _resolution = a._resolution;
+    _units = a._units;
+};
+
 void Approximation::units(const String& units)
 {
     _units = units;
