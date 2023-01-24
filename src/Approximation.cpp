@@ -10,7 +10,7 @@ Approximation::Approximation(void)
 
 Approximation::Approximation(double aValue, const String& units, double aResolution)
 {
-    _resolution = aResolution;
+    _resolution = fabs(aResolution);
     value(aValue);
     _units = units;
 };
@@ -27,7 +27,7 @@ String Approximation::units(void) const
 
 void Approximation::resolution(double res)
 {
-    _resolution = res;
+    _resolution = fabs(res);
     value(_requested);  // recalculate actual
 }
 
@@ -143,3 +143,85 @@ Approximation Approximation::convertFromTo(double fromVal, const String& fromUni
     }
     return converted;
 }
+
+Approximation::CompareResult Approximation::compare(double lhs, double rhs, double tolerance) const
+{
+    if (lhs < (rhs - tolerance))
+        return Less;
+    if (lhs > (rhs + tolerance))
+        return Greater;
+    return Equal;  // about equal
+}
+
+bool Approximation::unitsMatch(const Approximation& rhs) const
+{
+    return units() == rhs.units();
+}
+
+Approximation::CompareResult Approximation::compare(const Approximation& rhs) const
+{
+    if (!unitsMatch(rhs))
+        return Error;  // throw exception?
+
+    double res = max(resolution(), rhs.resolution());
+    return compare(value(), rhs.value(), res);
+}
+
+Approximation::CompareResult Approximation::compare(double rhs) const
+{
+    return compare(value(), rhs, resolution());
+}
+
+bool Approximation::operator==(double d) const
+{
+    return compare(d) == Equal;
+};
+bool Approximation::operator==(const Approximation& a) const
+{
+    return compare(a) == Equal;
+};
+
+bool Approximation::operator!=(double d) const
+{
+    return compare(d) != Equal;
+};
+bool Approximation::operator!=(const Approximation& a) const
+{
+    return compare(a) != Equal;
+};
+
+bool Approximation::operator<=(double d) const
+{
+    return compare(d) != Greater;
+};
+bool Approximation::operator<=(const Approximation& a) const
+{
+    return compare(a) != Greater;
+};
+
+bool Approximation::operator<(double d) const
+{
+    return compare(d) == Less;
+};
+bool Approximation::operator<(const Approximation& a) const
+{
+    return compare(a) == Less;
+};
+
+bool Approximation::operator>(double d) const
+{
+    return compare(d) == Greater;
+};
+bool Approximation::operator>(const Approximation& a) const
+{
+    return compare(a) == Greater;
+};
+
+bool Approximation::operator>=(double d) const
+{
+    return compare(d) != Less;
+};
+bool Approximation::operator>=(const Approximation& a) const
+{
+    return compare(a) != Less;
+};

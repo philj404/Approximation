@@ -216,6 +216,122 @@ test(lightningStrikeDistance)
     assertEqual("1.2miles", inMiles);  // round to nearest
 }
 
+test(equals)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertFalse(sixSeconds == 5.0);
+    assertFalse(sixSeconds == fiveSeconds);
+
+    assertTrue(sixSeconds == 6.0);
+    assertTrue(sixSeconds == 6.01);
+    assertTrue(sixSeconds == 5.9);
+    assertTrue(sixSeconds == aboutSixSeconds);
+    assertTrue(sixSeconds == sixSeconds);
+
+    assertFalse(sixSeconds == 7.0);
+    assertFalse(sixSeconds == sevenSeconds);
+}
+
+test(notEquals)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertTrue(sixSeconds != 5.0);
+    assertTrue(sixSeconds != fiveSeconds);
+
+    assertFalse(sixSeconds != 6.0);
+    assertFalse(sixSeconds != 6.01);
+    assertFalse(sixSeconds != aboutSixSeconds);
+    assertFalse(sixSeconds != sixSeconds);
+
+    assertTrue(sixSeconds != 7.0);
+    assertTrue(sixSeconds != sevenSeconds);
+}
+
+test(lessThanOrEqual)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertFalse(sixSeconds <= 5.0);
+    assertFalse(sixSeconds <= fiveSeconds);
+
+    assertTrue(sixSeconds <= 6.0);
+    assertTrue(sixSeconds <= 6.01);
+    assertTrue(sixSeconds <= aboutSixSeconds);
+    assertTrue(sixSeconds <= sixSeconds);
+
+    assertTrue(sixSeconds <= 7.0);
+    assertTrue(sixSeconds <= sevenSeconds);
+}
+
+test(lessThan)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertFalse(sixSeconds < 5.0);
+    assertFalse(sixSeconds < fiveSeconds);
+
+    assertFalse(sixSeconds < 6.0);
+    assertFalse(sixSeconds < 6.01);
+    assertFalse(sixSeconds < aboutSixSeconds);
+    assertFalse(sixSeconds < sixSeconds);
+
+    assertTrue(sixSeconds < 7.0);
+    assertTrue(sixSeconds < sevenSeconds);
+}
+
+test(greaterThanOrEqual)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertTrue(sixSeconds >= 5.0);
+    assertTrue(sixSeconds >= fiveSeconds);
+
+    assertTrue(sixSeconds >= 6.0);
+    assertTrue(sixSeconds >= 6.01);
+    assertTrue(sixSeconds >= aboutSixSeconds);
+    assertTrue(sixSeconds >= sixSeconds);
+
+    assertFalse(sixSeconds >= 7.0);
+    assertFalse(sixSeconds >= sevenSeconds);
+}
+
+test(greaterThan)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertTrue(sixSeconds > 5.0);
+    assertTrue(sixSeconds > fiveSeconds);
+
+    assertFalse(sixSeconds > 6.0);
+    assertFalse(sixSeconds > 6.01);
+    assertFalse(sixSeconds > 5.9);
+    assertFalse(sixSeconds > aboutSixSeconds);
+    assertFalse(sixSeconds > sixSeconds);
+
+    assertFalse(sixSeconds > 7.0);
+    assertFalse(sixSeconds > sevenSeconds);
+}
+
 //----------------------------------------------------------------------------
 // setup() and loop()
 //----------------------------------------------------------------------------
