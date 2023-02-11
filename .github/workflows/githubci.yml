@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/setup-python@v1
+    - uses: actions/setup-python@v4
       with:
         python-version: '3.x'
     - uses: actions/checkout@v3
@@ -23,6 +23,7 @@ jobs:
 
     - name: test platforms
       run: python3 ci/build_platform.py main_platforms
+      #run: python3 ci/build_platform.py main_platforms nrf52840
 
     # Make sure:
     #    there is a "gh-pages" branch
