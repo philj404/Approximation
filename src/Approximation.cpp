@@ -1,6 +1,6 @@
 // Approximation.cpp
-#include "Approximation.h"
 #include <Arduino.h>
+#include "Approximation.h"
 
 Approximation::Approximation(double val, double res)
     : Approximation(val, "", res){};
@@ -10,9 +10,17 @@ Approximation::Approximation(void)
 
 Approximation::Approximation(double aValue, const String& units, double aResolution)
 {
-    _resolution = aResolution;
+    _resolution = fabs(aResolution);
     value(aValue);
     _units = units;
+};
+
+Approximation::Approximation(const Approximation& a)
+{
+    _requested = a._requested;
+    _actual = a._actual;
+    _resolution = a._resolution;
+    _units = a._units;
 };
 
 void Approximation::units(const String& units)
@@ -27,7 +35,7 @@ String Approximation::units(void) const
 
 void Approximation::resolution(double res)
 {
-    _resolution = res;
+    _resolution = fabs(res);
     value(_requested);  // recalculate actual
 }
 
@@ -90,12 +98,9 @@ void Approximation::engUnitScaleFor(double aValue, char& siPrefix, double& siSca
 
 String Approximation::asString(void) const
 {
-    //bool negative = (_actual < 0.0);
-    auto positiveActual = fabs(_actual);
-
     // note the underlying float has at most 6 significant digits!
     int numDigits = 1;
-    float ratio = positiveActual / _resolution;
+    float ratio = fabs(_actual / _resolution);
     while (ratio >= 10.) {
         numDigits++;
         ratio /= 10.;
@@ -106,7 +111,7 @@ String Approximation::asString(void) const
     engUnitScaleFor(_actual, engUnit, normalizeUnit);
 
     auto digitsAfterDecimal = numDigits;
-    float displayActual = positiveActual / normalizeUnit;
+    float displayActual = fabs(_actual / normalizeUnit);
     if (displayActual >= 100.) {
         digitsAfterDecimal -= 3;
     } else if (displayActual >= 10.) {
@@ -114,8 +119,8 @@ String Approximation::asString(void) const
     } else {
         digitsAfterDecimal -= 1;
     }
-    
-    displayActual = _actual / normalizeUnit;
+
+    displayActual = _actual / normalizeUnit;  // signed
     if (digitsAfterDecimal < 0) {
         //auto coarseResolution = _resolution / normalizeUnit;
         auto coarseResolution = (digitsAfterDecimal < -1) ? 100. : 10.;
@@ -125,7 +130,7 @@ String Approximation::asString(void) const
 
     String s(displayActual, digitsAfterDecimal);
     if ((engUnit != 0) || (_units[0] != 0)) {
-        s += F(" ");
+        //s += F(" ");
         if (engUnit) { s += engUnit; }
         s += _units;
     }
@@ -146,3 +151,85 @@ Approximation Approximation::convertFromTo(double fromVal, const String& fromUni
     }
     return converted;
 }
+
+Approximation::CompareResult Approximation::compare(double lhs, double rhs, double tolerance) const
+{
+    if (lhs < (rhs - tolerance))
+        return Less;
+    if (lhs > (rhs + tolerance))
+        return Greater;
+    return Equal;  // about equal
+}
+
+bool Approximation::unitsMatch(const Approximation& rhs) const
+{
+    return units() == rhs.units();
+}
+
+Approximation::CompareResult Approximation::compare(const Approximation& rhs) const
+{
+    if (!unitsMatch(rhs))
+        return Error;  // throw exception?
+
+    double res = max(resolution(), rhs.resolution());
+    return compare(value(), rhs.value(), res);
+}
+
+Approximation::CompareResult Approximation::compare(double rhs) const
+{
+    return compare(value(), rhs, resolution());
+}
+
+bool Approximation::operator==(double d) const
+{
+    return compare(d) == Equal;
+};
+bool Approximation::operator==(const Approximation& a) const
+{
+    return compare(a) == Equal;
+};
+
+bool Approximation::operator!=(double d) const
+{
+    return compare(d) != Equal;
+};
+bool Approximation::operator!=(const Approximation& a) const
+{
+    return compare(a) != Equal;
+};
+
+bool Approximation::operator<=(double d) const
+{
+    return compare(d) != Greater;
+};
+bool Approximation::operator<=(const Approximation& a) const
+{
+    return compare(a) != Greater;
+};
+
+bool Approximation::operator<(double d) const
+{
+    return compare(d) == Less;
+};
+bool Approximation::operator<(const Approximation& a) const
+{
+    return compare(a) == Less;
+};
+
+bool Approximation::operator>(double d) const
+{
+    return compare(d) == Greater;
+};
+bool Approximation::operator>(const Approximation& a) const
+{
+    return compare(a) == Greater;
+};
+
+bool Approximation::operator>=(double d) const
+{
+    return compare(d) != Less;
+};
+bool Approximation::operator>=(const Approximation& a) const
+{
+    return compare(a) != Less;
+};

@@ -25,9 +25,9 @@ test(resolutions)
 test(units)
 {
     Approximation a(3.1416, 0.01);
-    a.units("Volts");
-    assertEqual("Volts", a.units());
-    assertEqual("3.14 Volts", a);
+    a.units("V");
+    assertEqual("V", a.units());
+    assertEqual("3.14V", a);
 }
 
 test(engineeringNotation)
@@ -35,7 +35,7 @@ test(engineeringNotation)
     Approximation a(3141.6, 10.0);
     a.units("V");
     assertEqual("V", a.units());
-    assertEqual("3.14 kV", a);
+    assertEqual("3.14kV", a);
 }
 
 char engUnitsFor(double aNumber)
@@ -93,12 +93,19 @@ test(engineeringScales)
     assertEqual(1000., engScaleFor(1000.));
     assertEqual(1.0e6, engScaleFor(1.05e6));
     assertEqual(1.0e9, engScaleFor(1.05e9));
-    assertEqual(1.0e12, engScaleFor(1.05e12));
-    assertEqual(1.0e-3, engScaleFor(1.05e-3));
-    assertEqual(1.0e-6, engScaleFor(1.05e-6));
-    assertEqual(1.0e-9, engScaleFor(1.05e-9));
-    assertEqual(1.0e-12, engScaleFor(1.05e-12));
-    assertEqual(1.0e-3, engScaleFor(-1.05e-3));
+
+    // Some Arduino platform floating point can't print > 1.e9
+    // printing is fixed point and has <long> limitations
+    //assertEqual(1.0e12, engScaleFor(1.05e12));
+
+    //assertEqual(1.0e-3, engScaleFor(1.05e-3));
+    //assertEqual(1.0e-3*1000, engScaleFor(1.05e-3)*1000);
+    assertNear(1.0e-3, engScaleFor(1.05e-3), 1.0e-6);
+
+    assertNear(1.0e-6, engScaleFor(1.05e-6), 1.0e-9);
+    assertNear(1.0e-9, engScaleFor(1.05e-9), 1.0e-12);
+    assertNear(1.0e-12, engScaleFor(1.05e-12), 1.0e-15);
+    assertNear(1.0e-3, engScaleFor(-1.05e-3), 1.0e-6);
 }
 
 // Arduino float to String conversion examples
@@ -138,22 +145,22 @@ test(roundBy5s)
 {
     // only show SIGNIFICANT digits
     Approximation a(1. / 3., 0.5);
-    assertEqual("500 m", a);  // round up
+    assertEqual("500m", a);  // round up
     a.value(0.249);
     assertEqual(" 0", a);
     a.value(0.251);
-    assertEqual("500 m", a);
+    assertEqual("500m", a);
 }
 
 test(roundBy2s)
 {
     // only show SIGNIFICANT digits
     Approximation a(1. / 3., 0.2);
-    assertEqual("400 m", a);  // round up
+    assertEqual("400m", a);  // round up
     a.value(0.099);
     assertEqual(" 0", a);
     a.value(0.101);
-    assertEqual("200 m", a);
+    assertEqual("200m", a);
 }
 
 test(negativeValues)
@@ -163,27 +170,27 @@ test(negativeValues)
 
     a.value(-10.e3 / 3.0);
     a.resolution(100.);
-    assertEqual("-3.3 k", a);
+    assertEqual("-3.3k", a);
 }
 
 test(inchesToMeters)
 {
-    Approximation inInches(100.0, "inches", 100.);
+    Approximation inInches(100.0, "in", 100.);
     //inInches.units("inches");
 
-    auto inMeters = inInches.convertFromTo(1.0, "inches", 0.0254, "meters");
+    auto inMeters = inInches.convertFromTo(1.0, "in", 0.0254, "m");
 
-    assertEqual(" 3 meters", inMeters);  // round to nearest
+    assertEqual(" 3m", inMeters);  // round to nearest
 }
 
 test(metersToInches)
 {
-    Approximation inMeters(10.0, "meters", 10.);
-    //inMeters.units("meters");
+    Approximation inMeters(10.0, "m", 10.);
+    //inMeters.units("m");
 
-    auto inInches = inMeters.convertFromTo(1.0, "meters", 39.37, "inches");
+    auto inInches = inMeters.convertFromTo(1.0, "m", 39.37, "in");
 
-    assertEqual("400 inches", inInches);  // round to nearest
+    assertEqual("400in", inInches);  // round to nearest
 }
 
 test(milesToKilometers)
@@ -193,7 +200,7 @@ test(milesToKilometers)
 
     auto inMeters = inMiles.convertFromTo(1.0, "miles", 1609., "m");
 
-    assertEqual("200 km", inMeters);  // round to nearest
+    assertEqual("200km", inMeters);  // round to nearest
 }
 
 test(lightningStrikeDistance)
@@ -206,7 +213,123 @@ test(lightningStrikeDistance)
 
     auto inMiles = inSeconds.convertFromTo(5.0, "s", 1.0, "miles");
 
-    assertEqual("1.2 miles", inMiles);  // round to nearest
+    assertEqual("1.2miles", inMiles);  // round to nearest
+}
+
+test(equals)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertFalse(sixSeconds == 5.0);
+    assertFalse(sixSeconds == fiveSeconds);
+
+    assertTrue(sixSeconds == 6.0);
+    assertTrue(sixSeconds == 6.01);
+    assertTrue(sixSeconds == 5.9);
+    assertTrue(sixSeconds == aboutSixSeconds);
+    assertTrue(sixSeconds == sixSeconds);
+
+    assertFalse(sixSeconds == 7.0);
+    assertFalse(sixSeconds == sevenSeconds);
+}
+
+test(notEquals)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertTrue(sixSeconds != 5.0);
+    assertTrue(sixSeconds != fiveSeconds);
+
+    assertFalse(sixSeconds != 6.0);
+    assertFalse(sixSeconds != 6.01);
+    assertFalse(sixSeconds != aboutSixSeconds);
+    assertFalse(sixSeconds != sixSeconds);
+
+    assertTrue(sixSeconds != 7.0);
+    assertTrue(sixSeconds != sevenSeconds);
+}
+
+test(lessThanOrEqual)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertFalse(sixSeconds <= 5.0);
+    assertFalse(sixSeconds <= fiveSeconds);
+
+    assertTrue(sixSeconds <= 6.0);
+    assertTrue(sixSeconds <= 6.01);
+    assertTrue(sixSeconds <= aboutSixSeconds);
+    assertTrue(sixSeconds <= sixSeconds);
+
+    assertTrue(sixSeconds <= 7.0);
+    assertTrue(sixSeconds <= sevenSeconds);
+}
+
+test(lessThan)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertFalse(sixSeconds < 5.0);
+    assertFalse(sixSeconds < fiveSeconds);
+
+    assertFalse(sixSeconds < 6.0);
+    assertFalse(sixSeconds < 6.01);
+    assertFalse(sixSeconds < aboutSixSeconds);
+    assertFalse(sixSeconds < sixSeconds);
+
+    assertTrue(sixSeconds < 7.0);
+    assertTrue(sixSeconds < sevenSeconds);
+}
+
+test(greaterThanOrEqual)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertTrue(sixSeconds >= 5.0);
+    assertTrue(sixSeconds >= fiveSeconds);
+
+    assertTrue(sixSeconds >= 6.0);
+    assertTrue(sixSeconds >= 6.01);
+    assertTrue(sixSeconds >= aboutSixSeconds);
+    assertTrue(sixSeconds >= sixSeconds);
+
+    assertFalse(sixSeconds >= 7.0);
+    assertFalse(sixSeconds >= sevenSeconds);
+}
+
+test(greaterThan)
+{
+    Approximation fiveSeconds(5.0, "s", 0.5);
+    Approximation sixSeconds(6.0, "s", 0.5);
+    Approximation aboutSixSeconds(6.01, "s", 0.5);
+    Approximation sevenSeconds(7.0, "s", 0.5);
+
+    assertTrue(sixSeconds > 5.0);
+    assertTrue(sixSeconds > fiveSeconds);
+
+    assertFalse(sixSeconds > 6.0);
+    assertFalse(sixSeconds > 6.01);
+    assertFalse(sixSeconds > 5.9);
+    assertFalse(sixSeconds > aboutSixSeconds);
+    assertFalse(sixSeconds > sixSeconds);
+
+    assertFalse(sixSeconds > 7.0);
+    assertFalse(sixSeconds > sevenSeconds);
 }
 
 //----------------------------------------------------------------------------
@@ -223,7 +346,7 @@ void setup()
     Serial.println(F("Running " __FILE__ ",\nBuilt " __DATE__));
     Serial.println(F("This test should produce the following:"));
     Serial.println(
-        F("EXAMPLE - SEE THE REAL ONE BELOW: 15 passed, 0 failed, 0 skipped, 0 timed out, out of 15 test(s)."));
+        F("EXAMPLE - SEE THE REAL ONE BELOW: 16 passed, 0 failed, 0 skipped, 0 timed out, out of 16 test(s)."));
     Serial.println(F("----"));
 }
 
