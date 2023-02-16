@@ -109,7 +109,7 @@ String Approximation::asString(void) const
 
     char engUnit = '\0';
     double normalizeUnit = 1.0;
-    double scalingValue = max(fabs(_actual), (double)_resolution);
+    double scalingValue = max((double)fabs(_actual), (double)_resolution);
 
     engUnitScaleFor(scalingValue, engUnit, normalizeUnit);
 
