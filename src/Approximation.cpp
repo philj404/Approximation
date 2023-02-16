@@ -11,7 +11,7 @@ Approximation::Approximation(void)
 
 Approximation::Approximation(double aValue, const String& units, double aResolution)
 {
-    _resolution = max(FLT_MIN, fabs(aResolution));
+    _resolution = max((double) FLT_MIN, fabs(aResolution));
     value(aValue);
     _units = units;
 };
@@ -36,7 +36,7 @@ String Approximation::units(void) const
 
 void Approximation::resolution(double res)
 {
-    _resolution = max(FLT_MIN, fabs(res));
+    _resolution = max((double) FLT_MIN, fabs(res));
     value(_requested);  // recalculate actual
 }
 
