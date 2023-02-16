@@ -1,16 +1,17 @@
 // Approximation.cpp
 #include <Arduino.h>
 #include "Approximation.h"
+#include <float.h>
 
 Approximation::Approximation(double val, double res)
     : Approximation(val, "", res){};
 
 Approximation::Approximation(void)
-    : Approximation(0.0, 1.e-6){};
+    : Approximation(0.0, FLT_MIN){};
 
 Approximation::Approximation(double aValue, const String& units, double aResolution)
 {
-    _resolution = fabs(aResolution);
+    _resolution = max(FLT_MIN, fabs(aResolution));
     value(aValue);
     _units = units;
 };
@@ -35,7 +36,7 @@ String Approximation::units(void) const
 
 void Approximation::resolution(double res)
 {
-    _resolution = fabs(res);
+    _resolution = max(FLT_MIN, fabs(res));
     value(_requested);  // recalculate actual
 }
 
@@ -98,10 +99,10 @@ void Approximation::engUnitScaleFor(double aValue, char& siPrefix, double& siSca
 
 String Approximation::asString(void) const
 {
-    // note the underlying float has at most 6 significant digits!
+    // note the underlying float has at most 6 (FLT_DIG) significant digits!
     int numDigits = 1;
     float ratio = fabs(_actual / _resolution);
-    while (ratio >= 10.) {
+    while ((ratio >= 10.) && (numDigits < FLT_DIG)) {
         numDigits++;
         ratio /= 10.;
     }
@@ -158,7 +159,7 @@ Approximation::CompareResult Approximation::compare(double lhs, double rhs, doub
         return Less;
     if (lhs > (rhs + tolerance))
         return Greater;
-    return Equal;  // about equal
+    return AboutEqual;  // about equal
 }
 
 bool Approximation::unitsMatch(const Approximation& rhs) const
@@ -182,20 +183,20 @@ Approximation::CompareResult Approximation::compare(double rhs) const
 
 bool Approximation::operator==(double d) const
 {
-    return compare(d) == Equal;
+    return compare(d) == AboutEqual;
 };
 bool Approximation::operator==(const Approximation& a) const
 {
-    return compare(a) == Equal;
+    return compare(a) == AboutEqual;
 };
 
 bool Approximation::operator!=(double d) const
 {
-    return compare(d) != Equal;
+    return compare(d) != AboutEqual;
 };
 bool Approximation::operator!=(const Approximation& a) const
 {
-    return compare(a) != Equal;
+    return compare(a) != AboutEqual;
 };
 
 bool Approximation::operator<=(double d) const
@@ -232,4 +233,21 @@ bool Approximation::operator>=(double d) const
 bool Approximation::operator>=(const Approximation& a) const
 {
     return compare(a) != Less;
+};
+
+Approximation& Approximation::operator+=(double d)
+{
+    value(_requested + d);
+    return *this;
+};
+
+Approximation& Approximation::operator+=(const Approximation& a)
+{
+    if (!unitsMatch(a)) {
+        units("units error");
+    }
+
+    value(_requested + a._requested);
+    resolution(max(resolution(), a.resolution()));
+    return *this;
 };
