@@ -35,7 +35,10 @@ class Approximation
     // operator double() const;
 
     // assignment
-    Approximation& operator=(double d);
+    Approximation& operator=(double d)
+    {
+        value(d);
+    };
     Approximation& operator=(const Approximation& a);
 
     // relational
@@ -55,8 +58,8 @@ class Approximation
     // binary arithmetic - for example a+b
     //Approximation& operator+(double d) const;
     //Approximation& operator+(const Approximation& a) const;
-    Approximation& operator-(double d) const;
-    Approximation& operator-(const Approximation& a) const;
+    //Approximation& operator-(double d) const;
+    //Approximation& operator-(const Approximation& a) const;
     Approximation& operator*(double d) const;
     Approximation& operator*(const Approximation& a) const;
     Approximation& operator/(double d) const;
@@ -73,6 +76,7 @@ class Approximation
     Approximation& operator/=(const Approximation& a);
 
     // friends defined inside class body are inline and are hidden from non-ADL lookup
+    // addition
     friend Approximation operator+(Approximation lhs,         // passing lhs by value helps optimize chained a+b+c
                                    const Approximation& rhs)  // otherwise, both parameters may be const references
     {
@@ -92,7 +96,29 @@ class Approximation
     {
         return operator+(rhs, lhs);  // commutative property
     }
-    
+
+    // subtraction
+    friend Approximation operator-(Approximation lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   const Approximation& rhs)  // otherwise, both parameters may be const references
+    {
+        lhs -= rhs;
+        return lhs;
+    }
+
+    friend Approximation operator-(double lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   Approximation rhs)  // otherwise, both parameters may be const references
+    {
+        rhs = (lhs - rhs._requested);
+        return rhs;
+    }
+
+    friend Approximation operator-(Approximation lhs,
+                                   double rhs)
+    {
+        lhs -= rhs;
+        return lhs;  // commutative property
+    }
+
     // unary arithmetic (-a)
     Approximation operator-() const;
 

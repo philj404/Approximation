@@ -11,7 +11,7 @@ Approximation::Approximation(void)
 
 Approximation::Approximation(double aValue, const String& units, double aResolution)
 {
-    _resolution = max((double) FLT_MIN, fabs(aResolution));
+    _resolution = max((double)FLT_MIN, fabs(aResolution));
     value(aValue);
     _units = units;
 };
@@ -36,7 +36,7 @@ String Approximation::units(void) const
 
 void Approximation::resolution(double res)
 {
-    _resolution = max((double) FLT_MIN, fabs(res));
+    _resolution = max((double)FLT_MIN, fabs(res));
     value(_requested);  // recalculate actual
 }
 
@@ -109,7 +109,9 @@ String Approximation::asString(void) const
 
     char engUnit = '\0';
     double normalizeUnit = 1.0;
-    engUnitScaleFor(_actual, engUnit, normalizeUnit);
+    double scalingValue = max(fabs(_actual), (double)_resolution);
+
+    engUnitScaleFor(scalingValue, engUnit, normalizeUnit);
 
     auto digitsAfterDecimal = numDigits;
     float displayActual = fabs(_actual / normalizeUnit);
@@ -130,6 +132,15 @@ String Approximation::asString(void) const
     }
 
     String s(displayActual, digitsAfterDecimal);
+    if (displayActual == 0.0) {
+        s = F("0"); // don't print leading space
+        if(digitsAfterDecimal > 0) {
+          s += F(".");
+          while (digitsAfterDecimal-- > 0) {
+            s += F("0");
+          }
+        }
+    }
     if ((engUnit != 0) || (_units[0] != 0)) {
         //s += F(" ");
         if (engUnit) { s += engUnit; }
@@ -252,10 +263,28 @@ Approximation& Approximation::operator+=(const Approximation& a)
     return *this;
 };
 
+Approximation& Approximation::operator-=(double d)
+{
+    value(_requested - d);
+    return *this;
+};
+
+Approximation& Approximation::operator-=(const Approximation& a)
+{
+    if (!unitsMatch(a)) {
+        units("units error");
+    }
+
+    value(_requested - a._requested);
+    resolution(max(resolution(), a.resolution()));
+    return *this;
+};
+
 Approximation Approximation::operator-() const
 {
     Approximation negated(*this);
-    negated._requested = -this->_requested;
-    negated._actual = -this->_actual;
+    //negated.value(-_requested);
+    negated._requested = -_requested;
+    negated._actual = -_actual;
     return negated;
 }
