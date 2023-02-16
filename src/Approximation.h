@@ -38,6 +38,7 @@ class Approximation
     Approximation& operator=(double d)
     {
         value(d);
+        return *this;
     };
     Approximation& operator=(const Approximation& a);
 
