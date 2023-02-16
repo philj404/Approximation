@@ -147,7 +147,7 @@ test(roundBy5s)
     Approximation a(1. / 3., 0.5);
     assertEqual("500m", a);  // round up
     a.value(0.249);
-    assertEqual(" 0", a);
+    assertEqual("0", a);
     a.value(0.251);
     assertEqual("500m", a);
 }
@@ -158,7 +158,7 @@ test(roundBy2s)
     Approximation a(1. / 3., 0.2);
     assertEqual("400m", a);  // round up
     a.value(0.099);
-    assertEqual(" 0", a);
+    assertEqual("0", a);
     a.value(0.101);
     assertEqual("200m", a);
 }
