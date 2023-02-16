@@ -251,3 +251,11 @@ Approximation& Approximation::operator+=(const Approximation& a)
     resolution(max(resolution(), a.resolution()));
     return *this;
 };
+
+Approximation Approximation::operator-() const
+{
+    Approximation negated(*this);
+    negated._requested = -this->_requested;
+    negated._actual = -this->_actual;
+    return negated;
+}
