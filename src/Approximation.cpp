@@ -133,12 +133,12 @@ String Approximation::asString(void) const
 
     String s(displayActual, digitsAfterDecimal);
     if (displayActual == 0.0) {
-        s = F("0"); // don't print leading space
-        if(digitsAfterDecimal > 0) {
-          s += F(".");
-          while (digitsAfterDecimal-- > 0) {
-            s += F("0");
-          }
+        s = F("0");  // don't print leading space
+        if (digitsAfterDecimal > 0) {
+            s += F(".");
+            while (digitsAfterDecimal-- > 0) {
+                s += F("0");
+            }
         }
     }
     if ((engUnit != 0) || (_units[0] != 0)) {
@@ -149,9 +149,13 @@ String Approximation::asString(void) const
     return s;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// unit conversions
+//
 // to convert an approximation to different units
 // example: // speed of sound is about 340 m/s
 //Approximation distanceInMeters = distanceInSeconds.convertFromTo(1.0, "s", 340., "m");
+//
 Approximation Approximation::convertFromTo(double fromVal, const String& fromUnits, double toVal, const String& toUnits) const
 {
     auto conversionFactor = toVal / fromVal;
@@ -164,6 +168,9 @@ Approximation Approximation::convertFromTo(double fromVal, const String& fromUni
     return converted;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// comparisons
+//
 Approximation::CompareResult Approximation::compare(double lhs, double rhs, double tolerance) const
 {
     if (lhs < (rhs - tolerance))
@@ -246,6 +253,9 @@ bool Approximation::operator>=(const Approximation& a) const
     return compare(a) != Less;
 };
 
+///////////////////////////////////////////////////////////////////////////////
+// math operators
+//
 Approximation& Approximation::operator+=(double d)
 {
     value(_requested + d);
@@ -255,7 +265,7 @@ Approximation& Approximation::operator+=(double d)
 Approximation& Approximation::operator+=(const Approximation& a)
 {
     if (!unitsMatch(a)) {
-        units("units error");
+        unitsError();
     }
 
     value(_requested + a._requested);
@@ -272,7 +282,7 @@ Approximation& Approximation::operator-=(double d)
 Approximation& Approximation::operator-=(const Approximation& a)
 {
     if (!unitsMatch(a)) {
-        units("units error");
+        unitsError();
     }
 
     value(_requested - a._requested);
@@ -288,3 +298,28 @@ Approximation Approximation::operator-() const
     negated._actual = -_actual;
     return negated;
 }
+
+void Approximation::unitsError(void)
+{
+    units("units error");
+}
+
+Approximation& Approximation::operator*=(const Approximation& a)
+{
+    _units += a._units;
+
+    // FIXME
+    auto res1 = resolution()*fabs(a._requested);
+    auto res2 = fabs(_requested) * a.resolution();
+    value(_requested * a._requested);
+    resolution(max(res1,res2));
+    return *this;
+};
+
+Approximation& Approximation::operator*=(double d)
+{
+    value(_requested * d);
+    // FIXME
+    resolution(resolution() * fabs(d));
+    return *this;
+};

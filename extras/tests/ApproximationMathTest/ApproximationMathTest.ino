@@ -99,8 +99,6 @@ test(minusDouble)
 test(digitsForZero)
 {
     Approximation zeroAmps(0.0, "A", 0.1);
-
-    // FIXME: why is there a leading space?
     assertEqual(zeroAmps, "0mA");
 
     zeroAmps.resolution(0.01);
@@ -108,6 +106,9 @@ test(digitsForZero)
 
     zeroAmps.resolution(0.001);
     assertEqual(zeroAmps, "0mA");
+
+    zeroAmps.resolution(1.0);
+    assertEqual(zeroAmps, "0A");
 
     zeroAmps.resolution(1000.);
     assertEqual(zeroAmps, "0kA");
@@ -123,6 +124,31 @@ test(assignFromDouble)
     assertEqual(someAmps, "3.3A");
 }
 
+// test(multiply)
+// {
+//     Approximation twoAmps(2.0, "A", 0.01);
+//     Approximation fiveVolts(5.0, "V", 0.001);
+//     auto tenWatts = fiveVolts * twoAmps;
+//     assertEqual(tenWatts, "10.0VA");  //DC volt-amps is Watts
+// }
+
+test(timesEquals)
+{
+    Approximation tenWatts(2.0, "V", 0.01);
+    Approximation fiveAmps(5.0, "A", 0.001);
+    tenWatts *= fiveAmps; // *= Approximation
+    assertEqual(tenWatts, "10.0VA");  //DC volt-amps is Watts
+  
+}
+
+test(timesEqualsDouble)
+{
+    Approximation tenAmps(5.0, "A", 0.001);
+     assertEqual(tenAmps, "5.000A"); 
+    tenAmps *= 2.0; // *= double
+     assertEqual(tenAmps, "10.00A"); 
+   
+}
 //----------------------------------------------------------------------------
 // setup() and loop()
 //----------------------------------------------------------------------------

@@ -61,20 +61,20 @@ class Approximation
     //Approximation& operator+(const Approximation& a) const;
     //Approximation& operator-(double d) const;
     //Approximation& operator-(const Approximation& a) const;
-    Approximation& operator*(double d) const;
-    Approximation& operator*(const Approximation& a) const;
-    Approximation& operator/(double d) const;
-    Approximation& operator/(const Approximation& a) const;
+    // Approximation& operator*(double d) const;
+    // Approximation& operator*(const Approximation& a) const;
+    // Approximation& operator/(double d) const;
+    // Approximation& operator/(const Approximation& a) const;
 
     // assignment
     Approximation& operator+=(double d);
     Approximation& operator-=(double d);
     Approximation& operator*=(double d);
-    Approximation& operator/=(double d);
+    // Approximation& operator/=(double d);
     Approximation& operator+=(const Approximation& a);
     Approximation& operator-=(const Approximation& a);
     Approximation& operator*=(const Approximation& a);
-    Approximation& operator/=(const Approximation& a);
+    // Approximation& operator/=(const Approximation& a);
 
     // friends defined inside class body are inline and are hidden from non-ADL lookup
     // addition
@@ -117,15 +117,16 @@ class Approximation
                                    double rhs)
     {
         lhs -= rhs;
-        return lhs;  // commutative property
+        return lhs;  // not commutative
     }
 
     // unary arithmetic (-a)
-    Approximation operator-() const;
+    Approximation operator-() const;  // negation
 
 
   private:
     bool unitsMatch(const Approximation& rhs) const;
+    void unitsError(void);
 
     enum CompareResult { Less,
                          AboutEqual,
