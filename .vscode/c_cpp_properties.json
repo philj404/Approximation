@@ -3,7 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "/home/philj/Arduino/libraries/Approximation/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../**"
             ],
             "defines": [],
             "cStandard": "c17",
@@ -15,7 +16,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "${workspaceFolder}/**"
+                    "${workspaceFolder}/**",
+                    "${workspaceFolder}/../**"
                 ]
             }
         }
