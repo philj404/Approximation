@@ -13,24 +13,46 @@ VERSION := $(shell git describe --tags --always --dirty)
 
 # FULL build and test from scratch
 all: clean test
-#all: run test
 
-# example for typical makefile usage
-#CoinFlipper.cpp: 
-#    gcc -o ./target/CoinFlipper.out ./src/main/CoinFlipper.cpp
-
+# Build tests
 run:
 	make -C extras/tests
 
+# Run tests
 test: run
 	make -C extras/tests runtests
 
+# Delete working/output files
 clean:
 	make -C extras/tests clean
 
+# Build tests compatible with debugger (gdb)
 debug:
+	echo Making DEBUG
 	make -C extras/tests debug
 
+#
+# VSCode "Debug" and "Release" configuration build support
+#
+# usage:  "make CONFIG=DEBUG" or "make CONFIG=RELEASE"
+#
+
+# "release" alias
+release: run
+	echo Making RELEASE
+
+# collect configuration from command line ("RELEASE" if not set)
+CONFIG ?= RELEASE
+
+ifeq ($(CONFIG), DEBUG)
+
+configuredBuild: debug
+
+else
+
+configuredBuild: release
+
+endif
 
 #$(NAME)-$(VERSION).zip:
 #	git archive HEAD --prefix=$(@:.zip=)/ --format=zip -o $@
