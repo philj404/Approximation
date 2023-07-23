@@ -13,7 +13,6 @@ include ../../../../EpoxyDuino/EpoxyDuino.mk
 # Additional hints for Visual Studio Code debug
 # for "make debug"
 #
-# TODO: move this to its own "DebugConfig.mk" include
 debug: EXTRA_CXXFLAGS += -DDEBUG -g
 debug: EXTRA_CFLAGS += -DDEBUG -g
 debug: all

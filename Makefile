@@ -17,19 +17,23 @@ all: clean test
 # Build tests
 run:
 	make -C extras/tests
+	make -C examples
 
 # Run tests
 test: run
 	make -C extras/tests runtests
+	make -C examples runtests
 
 # Delete working/output files
 clean:
 	make -C extras/tests clean
+	make -C examples clean
 
 # Build tests compatible with debugger (gdb)
 debug:
 	echo Making DEBUG
 	make -C extras/tests debug
+	make -C examples debug
 
 #
 # VSCode "Debug" and "Release" configuration build support
