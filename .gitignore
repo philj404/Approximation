@@ -1,0 +1,4 @@
+# Linux compiler output files
+*.o
+*.out
+*.swp

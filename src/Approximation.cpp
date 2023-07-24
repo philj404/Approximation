@@ -1,16 +1,17 @@
 // Approximation.cpp
 #include <Arduino.h>
 #include "Approximation.h"
+#include <float.h>
 
 Approximation::Approximation(double val, double res)
     : Approximation(val, "", res){};
 
 Approximation::Approximation(void)
-    : Approximation(0.0, 1.e-6){};
+    : Approximation(0.0, FLT_MIN){};
 
 Approximation::Approximation(double aValue, const String& units, double aResolution)
 {
-    _resolution = fabs(aResolution);
+    _resolution = max((double)FLT_MIN, fabs(aResolution));
     value(aValue);
     _units = units;
 };
@@ -35,7 +36,7 @@ String Approximation::units(void) const
 
 void Approximation::resolution(double res)
 {
-    _resolution = fabs(res);
+    _resolution = max((double)FLT_MIN, fabs(res));
     value(_requested);  // recalculate actual
 }
 
@@ -98,17 +99,19 @@ void Approximation::engUnitScaleFor(double aValue, char& siPrefix, double& siSca
 
 String Approximation::asString(void) const
 {
-    // note the underlying float has at most 6 significant digits!
+    // note the underlying float has at most 6 (FLT_DIG) significant digits!
     int numDigits = 1;
     float ratio = fabs(_actual / _resolution);
-    while (ratio >= 10.) {
+    while ((ratio >= 10.) && (numDigits < FLT_DIG)) {
         numDigits++;
         ratio /= 10.;
     }
 
     char engUnit = '\0';
     double normalizeUnit = 1.0;
-    engUnitScaleFor(_actual, engUnit, normalizeUnit);
+    double scalingValue = max((double)fabs(_actual), (double)_resolution);
+
+    engUnitScaleFor(scalingValue, engUnit, normalizeUnit);
 
     auto digitsAfterDecimal = numDigits;
     float displayActual = fabs(_actual / normalizeUnit);
@@ -129,6 +132,15 @@ String Approximation::asString(void) const
     }
 
     String s(displayActual, digitsAfterDecimal);
+    if (displayActual == 0.0) {
+        s = F("0");  // don't print leading space
+        if (digitsAfterDecimal > 0) {
+            s += F(".");
+            while (digitsAfterDecimal-- > 0) {
+                s += F("0");
+            }
+        }
+    }
     if ((engUnit != 0) || (_units[0] != 0)) {
         //s += F(" ");
         if (engUnit) { s += engUnit; }
@@ -137,9 +149,13 @@ String Approximation::asString(void) const
     return s;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// unit conversions
+//
 // to convert an approximation to different units
 // example: // speed of sound is about 340 m/s
 //Approximation distanceInMeters = distanceInSeconds.convertFromTo(1.0, "s", 340., "m");
+//
 Approximation Approximation::convertFromTo(double fromVal, const String& fromUnits, double toVal, const String& toUnits) const
 {
     auto conversionFactor = toVal / fromVal;
@@ -152,13 +168,16 @@ Approximation Approximation::convertFromTo(double fromVal, const String& fromUni
     return converted;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// comparisons
+//
 Approximation::CompareResult Approximation::compare(double lhs, double rhs, double tolerance) const
 {
     if (lhs < (rhs - tolerance))
         return Less;
     if (lhs > (rhs + tolerance))
         return Greater;
-    return Equal;  // about equal
+    return AboutEqual;  // about equal
 }
 
 bool Approximation::unitsMatch(const Approximation& rhs) const
@@ -182,20 +201,20 @@ Approximation::CompareResult Approximation::compare(double rhs) const
 
 bool Approximation::operator==(double d) const
 {
-    return compare(d) == Equal;
+    return compare(d) == AboutEqual;
 };
 bool Approximation::operator==(const Approximation& a) const
 {
-    return compare(a) == Equal;
+    return compare(a) == AboutEqual;
 };
 
 bool Approximation::operator!=(double d) const
 {
-    return compare(d) != Equal;
+    return compare(d) != AboutEqual;
 };
 bool Approximation::operator!=(const Approximation& a) const
 {
-    return compare(a) != Equal;
+    return compare(a) != AboutEqual;
 };
 
 bool Approximation::operator<=(double d) const
@@ -232,4 +251,75 @@ bool Approximation::operator>=(double d) const
 bool Approximation::operator>=(const Approximation& a) const
 {
     return compare(a) != Less;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+// math operators
+//
+Approximation& Approximation::operator+=(double d)
+{
+    value(_requested + d);
+    return *this;
+};
+
+Approximation& Approximation::operator+=(const Approximation& a)
+{
+    if (!unitsMatch(a)) {
+        unitsError();
+    }
+
+    value(_requested + a._requested);
+    resolution(max(resolution(), a.resolution()));
+    return *this;
+};
+
+Approximation& Approximation::operator-=(double d)
+{
+    value(_requested - d);
+    return *this;
+};
+
+Approximation& Approximation::operator-=(const Approximation& a)
+{
+    if (!unitsMatch(a)) {
+        unitsError();
+    }
+
+    value(_requested - a._requested);
+    resolution(max(resolution(), a.resolution()));
+    return *this;
+};
+
+Approximation Approximation::operator-() const
+{
+    Approximation negated(*this);
+    //negated.value(-_requested);
+    negated._requested = -_requested;
+    negated._actual = -_actual;
+    return negated;
+}
+
+void Approximation::unitsError(void)
+{
+    units("units error");
+}
+
+Approximation& Approximation::operator*=(const Approximation& a)
+{
+    _units += a._units;
+
+    // FIXME
+    auto res1 = resolution()*fabs(a._requested);
+    auto res2 = fabs(_requested) * a.resolution();
+    value(_requested * a._requested);
+    resolution(max(res1,res2));
+    return *this;
+};
+
+Approximation& Approximation::operator*=(double d)
+{
+    value(_requested * d);
+    // FIXME
+    resolution(resolution() * fabs(d));
+    return *this;
 };

@@ -1,0 +1,37 @@
+{
+    "makefile.configurations": [
+        {
+            "name": "Default",
+            "makeArgs": []
+        },
+        {
+            "name": "Debug",
+            "makeArgs": [
+                "CONFIG=DEBUG",
+                "configuredBuild"
+            ]
+        },
+        {
+            "name": "Release",
+            "makeArgs": [
+                "CONFIG=RELEASE",
+                "configuredBuild"
+            ]
+        },
+        {
+            "name": "Print make version",
+            "makeArgs": [
+                "--version"
+            ]
+        },
+        {
+            "name": "myconf",
+            "buildLog": "",
+            "makeArgs": [],
+            "makeDirectory": "",
+            "makefilePath": "",
+            "makePath": "",
+            "problemMatchers": []
+        }
+    ]
+}

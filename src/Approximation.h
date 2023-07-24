@@ -35,8 +35,12 @@ class Approximation
     // operator double() const;
 
     // assignment
-    Approximation operator=(double d);
-    Approximation operator=(const Approximation& a);
+    Approximation& operator=(double d)
+    {
+        value(d);
+        return *this;
+    };
+    Approximation& operator=(const Approximation& a);
 
     // relational
     bool operator==(double d) const;
@@ -53,33 +57,79 @@ class Approximation
     bool operator<=(const Approximation& a) const;
 
     // binary arithmetic - for example a+b
-    Approximation operator+(double d) const;
-    Approximation operator+(const Approximation& a) const;
-    Approximation operator-(double d) const;
-    Approximation operator-(const Approximation& a) const;
-    Approximation operator*(double d) const;
-    Approximation operator*(const Approximation& a) const;
-    Approximation operator/(double d) const;
-    Approximation operator/(const Approximation& a) const;
+    //Approximation& operator+(double d) const;
+    //Approximation& operator+(const Approximation& a) const;
+    //Approximation& operator-(double d) const;
+    //Approximation& operator-(const Approximation& a) const;
+    // Approximation& operator*(double d) const;
+    // Approximation& operator*(const Approximation& a) const;
+    // Approximation& operator/(double d) const;
+    // Approximation& operator/(const Approximation& a) const;
 
     // assignment
-    Approximation operator+=(double d);
-    Approximation operator-=(double d);
-    Approximation operator*=(double d);
-    Approximation operator/=(double d);
-    Approximation operator+=(const Approximation& a);
-    Approximation operator-=(const Approximation& a);
-    Approximation operator*=(const Approximation& a);
-    Approximation operator/=(const Approximation& a);
+    Approximation& operator+=(double d);
+    Approximation& operator-=(double d);
+    Approximation& operator*=(double d);
+    // Approximation& operator/=(double d);
+    Approximation& operator+=(const Approximation& a);
+    Approximation& operator-=(const Approximation& a);
+    Approximation& operator*=(const Approximation& a);
+    // Approximation& operator/=(const Approximation& a);
 
-    // unary arithmetic? (-a)
+    // friends defined inside class body are inline and are hidden from non-ADL lookup
+    // addition
+    friend Approximation operator+(Approximation lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   const Approximation& rhs)  // otherwise, both parameters may be const references
+    {
+        lhs += rhs;
+        return lhs;
+    }
+
+    friend Approximation operator+(double lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   Approximation rhs)  // otherwise, both parameters may be const references
+    {
+        rhs += lhs;
+        return rhs;
+    }
+
+    friend Approximation operator+(Approximation lhs,
+                                   double rhs)
+    {
+        return operator+(rhs, lhs);  // commutative property
+    }
+
+    // subtraction
+    friend Approximation operator-(Approximation lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   const Approximation& rhs)  // otherwise, both parameters may be const references
+    {
+        lhs -= rhs;
+        return lhs;
+    }
+
+    friend Approximation operator-(double lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   Approximation rhs)  // otherwise, both parameters may be const references
+    {
+        rhs = (lhs - rhs._requested);
+        return rhs;
+    }
+
+    friend Approximation operator-(Approximation lhs,
+                                   double rhs)
+    {
+        lhs -= rhs;
+        return lhs;  // not commutative
+    }
+
+    // unary arithmetic (-a)
+    Approximation operator-() const;  // negation
 
 
   private:
     bool unitsMatch(const Approximation& rhs) const;
+    void unitsError(void);
 
     enum CompareResult { Less,
-                         Equal,
+                         AboutEqual,
                          Greater,
                          Error };
     CompareResult compare(double lhs, double rhs, double tolerance) const;
