@@ -23,7 +23,6 @@ jobs:
 
     - name: test platforms
       run: python3 ci/build_platform.py main_platforms
-      #run: python3 ci/build_platform.py main_platforms nrf52840
 
     # Make sure:
     #    there is a "gh-pages" branch
@@ -31,7 +30,7 @@ jobs:
     #        (used to push generated docs back onto github)
     #
     # NOTE: at this time I don't think doxygen is worth it for this
-    #       library. Overkill for a "simple shell"?
+    #       library.
     #
     #       See the README.md for how to use.
     #

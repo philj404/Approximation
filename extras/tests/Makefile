@@ -1,3 +1,7 @@
+# Makefile for unit test checks
+#
+
+# build tests
 tests:
 	set -e; \
 	for i in *Test/Makefile; do \
@@ -5,6 +9,7 @@ tests:
 		make -C $$(dirname $$i) -j; \
 	done
 
+# run all unit tests
 runtests:
 	set -e; \
 	for i in *Test/Makefile; do \
@@ -12,6 +17,7 @@ runtests:
 		make -C $$(dirname $$i) run; \
 	done
 
+# remove generated output files
 clean:
 	set -e; \
 	for i in *Test/Makefile; do \
@@ -19,6 +25,7 @@ clean:
 		make -C $$(dirname $$i) clean; \
 	done
 
+# build tests with debugger support
 debug:
 	set -e; \
 	for i in *Test/Makefile; do \
