@@ -124,32 +124,93 @@ test(assignFromDouble)
     assertEqual(someAmps, "3.3A");
 }
 
-// test(multiply)
-// {
-//     Approximation twoAmps(2.0, "A", 0.01);
-//     Approximation fiveVolts(5.0, "V", 0.001);
-//     auto tenWatts = fiveVolts * twoAmps;
-//     assertEqual(tenWatts, "10.0VA");  //DC volt-amps is Watts
-// }
-
-test(timesEquals)
+test(multiply)
 {
-    Approximation tenWatts(2.0, "V", 0.01);
-    Approximation fiveAmps(5.0, "A", 0.001);
-    tenWatts *= fiveAmps; // *= Approximation
-    skip();
-    assertEqual(tenWatts, "10.0VA");  //DC volt-amps is Watts
-  
+    const Approximation twoAmps(2.0, "A", 0.01);
+    const Approximation fiveVolts(5.0, "V", 0.001);
+
+    Approximation tenWatts = fiveVolts * twoAmps;
+    assertEqual(tenWatts, "10.00VA");  //DC volt-amps is Watts
+
+    Approximation twoMilliAmps = twoAmps * 0.001;
+    assertEqual(twoMilliAmps, "2.00mA");
+
+    Approximation twoMilliAmps2 = 0.001 * twoAmps;
+    assertEqual(twoMilliAmps, "2.00mA");
+}
+
+test(timesEqualsCoarseFine)
+{
+    Approximation ten_Watts(2.0, "V", 0.1);              // ~2 digits
+    const Approximation five_000_Amps(5.0, "A", 0.001);  // ~4 digits
+    ten_Watts *= five_000_Amps;                          // *= Approximation
+
+    assertEqual(ten_Watts, "10VA");  //DC volt-amps is Watts
+}
+
+test(timesEqualsFineCoarse)
+{
+    Approximation ten_Watts2(1.0, "V", 0.001);    // ~4 digits
+    const Approximation tenAmps(10.0, "A", 1.0);  // ~2 digits
+    ten_Watts2 *= tenAmps;                        // *= Approximation
+ 
+    assertEqual(ten_Watts2, "10VA");  //DC volt-amps is Watts
 }
 
 test(timesEqualsDouble)
 {
     Approximation tenAmps(5.0, "A", 0.001);
-     assertEqual(tenAmps, "5.000A"); 
-    tenAmps *= 2.0; // *= double
-     assertEqual(tenAmps, "10.00A"); 
-   
+    assertEqual(tenAmps, "5.000A");
+    tenAmps *= 2.0;  // *= double
+    assertEqual(tenAmps, "10.00A");
 }
+
+test(divideEqualsDouble)
+{
+    Approximation tenAmps(10.0, "A", 0.001);
+    assertEqual(tenAmps, "10.000A");
+    tenAmps /= 10.0;  // double
+    assertEqual(tenAmps, "1.0000A");
+
+    Approximation infAmps(10.0, "A", 0.001);
+    infAmps /= 0.0;
+    assertEqual(infAmps, "-nanA");  // [not guaranteed?]
+}
+
+test(divideEqualsApprox)
+{
+    Approximation tenWatts(10.0, "W", 0.001);
+    const Approximation oneAmp(1.0, "A", 0.1);
+    assertEqual(tenWatts, "10.000W");
+    assertEqual(oneAmp, "1.0A");
+
+    tenWatts /= oneAmp;
+    assertEqual(tenWatts, "10W/A");
+}
+
+test(divideApprox)
+{
+    const Approximation tenWatts(10.0, "W", 0.001);
+    const Approximation oneAmp(1.0, "A", 0.1);
+    assertEqual(tenWatts, "10.000W");
+    assertEqual(oneAmp, "1.0A");
+
+    Approximation oneVolt = tenWatts / oneAmp;
+    assertEqual(oneVolt, "10W/A");
+}
+
+test(divideDouble)
+{
+    Approximation tenAmps(10.0, "A", 0.001);
+    assertEqual(tenAmps, "10.000A");
+
+    Approximation oneAmp = tenAmps / 10.0;
+    assertEqual(oneAmp, "1.0000A");
+
+    Approximation oneAmp2 = 10.0 / tenAmps;
+    assertEqual(oneAmp2, "1.0000/A");
+}
+
 //----------------------------------------------------------------------------
 // setup() and loop()
 //----------------------------------------------------------------------------
@@ -159,12 +220,12 @@ void setup()
     delay(1000);           // wait for stability on some boards to prevent garbage Serial
     Serial.begin(115200);  // ESP8266 default of 74880 not supported on Linux
     while (!Serial)
-        ;  // for the Arduino Leonardo/Micro only
+        ;                  // for the Arduino Leonardo/Micro only
 
     Serial.println(F("Running " __FILE__ ",\nBuilt " __DATE__));
     Serial.println(F("This test should produce the following:"));
     Serial.println(
-        F("EXAMPLE - SEE THE REAL ONE BELOW: 16 passed, 0 failed, 0 skipped, 0 timed out, out of 16 test(s)."));
+        F("EXAMPLE - SEE THE REAL ONE BELOW: <N> passed, 0 failed, 0 skipped, 0 timed out, out of <N> test(s)."));
     Serial.println(F("----"));
 }
 

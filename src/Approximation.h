@@ -16,6 +16,7 @@ class Approximation
     double value(void) const;
     void resolution(double aResolution);
     double resolution(void) const;
+    double relativeResolution(void) const;
     void units(const String& units);
     String units(void) const;
 
@@ -70,11 +71,11 @@ class Approximation
     Approximation& operator+=(double d);
     Approximation& operator-=(double d);
     Approximation& operator*=(double d);
-    // Approximation& operator/=(double d);
+    Approximation& operator/=(double d);
     Approximation& operator+=(const Approximation& a);
     Approximation& operator-=(const Approximation& a);
     Approximation& operator*=(const Approximation& a);
-    // Approximation& operator/=(const Approximation& a);
+    Approximation& operator/=(const Approximation& a);
 
     // friends defined inside class body are inline and are hidden from non-ADL lookup
     // addition
@@ -118,6 +119,51 @@ class Approximation
     {
         lhs -= rhs;
         return lhs;  // not commutative
+    }
+
+    // multiplication
+    friend Approximation operator*(Approximation lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   const Approximation& rhs)  // otherwise, both parameters may be const references
+    {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    friend Approximation operator*(double lhs,         // passing lhs by value helps optimize chained a+b+c
+                                   Approximation rhs)  // otherwise, both parameters may be const references
+    {
+        rhs *= lhs;
+        return rhs;
+    }
+
+    friend Approximation operator*(Approximation lhs,
+                                   double rhs)
+    {
+        return operator*(rhs, lhs);  // commutative property
+    }
+
+    // division
+    friend Approximation operator/(double lhs,
+                                   const Approximation& rhs)  // otherwise, both parameters may be const references
+    {
+        Approximation value(lhs, "", 0.0);
+        value /= rhs;
+        return value;
+    }
+
+    friend Approximation operator/(Approximation lhs,
+                                   double rhs)
+    {
+        lhs /= rhs;
+        return lhs;
+    }
+
+    friend Approximation operator/(const Approximation& lhs,
+                                   const Approximation& rhs)
+    {
+        Approximation value(lhs);
+        value /= rhs;
+        return value;
     }
 
     // unary arithmetic (-a)

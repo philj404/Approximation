@@ -45,6 +45,16 @@ double Approximation::resolution(void) const
     return _resolution;
 }
 
+double Approximation::relativeResolution(void) const
+{
+    double relRes = 1.0;  // default not very precise
+    auto factual = fabs(_actual);
+    if (factual > _resolution) {
+        relRes = fabs(_resolution / factual);
+    }
+    return relRes;
+}
+
 void Approximation::value(double v)
 {
     _requested = v;
@@ -308,18 +318,50 @@ Approximation& Approximation::operator*=(const Approximation& a)
 {
     _units += a._units;
 
-    // FIXME
-    auto res1 = resolution()*fabs(a._requested);
-    auto res2 = fabs(_requested) * a.resolution();
-    value(_requested * a._requested);
-    resolution(max(res1,res2));
+    auto res = relativeResolution();
+    auto aRes = a.relativeResolution();
+    auto newRelativeRes = max(res, aRes);
+
+    auto newVal = _requested * a._requested;
+    resolution(newRelativeRes * newVal);  // absolute resolution
+    value(newVal);
     return *this;
 };
 
 Approximation& Approximation::operator*=(double d)
 {
     value(_requested * d);
-    // FIXME
     resolution(resolution() * fabs(d));
+    return *this;
+};
+
+Approximation& Approximation::operator/=(double d)
+{
+    /* if (d != 0) */
+    {
+        value(_requested / d);
+        resolution(resolution() / fabs(d));
+    }  // else { /* ? divide by zero FIXME */ }
+    return *this;
+};
+
+Approximation& Approximation::operator/=(const Approximation& d)
+{
+    _units += "/";
+    _units += d._units;
+
+    auto res = relativeResolution();
+    auto dRes = d.relativeResolution();
+    auto newRelativeRes = max(res, dRes);
+
+    // if (d._requested == 0.0) {
+    // ? divide by zero FIXME
+    // } else
+    {
+        auto newVal = _requested / d._requested;
+        resolution(newRelativeRes * newVal);  // absolute resolution
+        value(newVal);
+    }
+
     return *this;
 };
