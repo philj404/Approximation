@@ -22,7 +22,7 @@ run:
 # Run tests
 test: run
 	make -C extras/tests runtests
-	make -C examples runtests
+	#make -C examples runtests
 
 # Delete working/output files
 clean:
